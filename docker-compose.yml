@@ -88,3 +88,7 @@ services:
       - MYSQL_DATABASE=nextcloud
       - MYSQL_USER=nextcloud
       - MYSQL_PASSWORD=Secret
+networks:
+  default:
+    external:
+	  name: web-proxy
