@@ -1,0 +1,90 @@
+version: '3'
+services:
+  nginx-proxy:
+    image: jwilder/nginx-proxy
+    container_name: nginx-proxy
+    labels: 
+        com.github.jrcs.letsencrypt_nginx_proxy_companion.nginx_proxy: "true"
+    ports: 
+      - 80:80
+      - 443:443
+    volumes:
+      - /docker/nginx/certs:/etc/nginx/certs:ro
+      - /docker/nginx/conf.d:/etc/nginx/conf.d
+      - /docker/nginx/vhost.d:/etc/nginx/vhost.d
+      - /docker/nginx/html/:/usr/share/nginx/html
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+  letsencrypt:
+    image: jrcs/letsencrypt-nginx-proxy-companion
+    container_name: letsencrypt
+    volumes:
+      - /docker/nginx/conf.d:/etc/nginx/conf.d
+      - /docker/nginx/vhost.d:/etc/nginx/vhost.d
+      - /docker/nginx/html/:/usr/share/nginx/html
+      - /docker/nginx/certs:/etc/nginx/certs:rw
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+
+  web-aria2:  
+    image: webui-aria2-nginx
+    container_name: web-aria2
+    environment:
+      - VIRTUAL_HOST=aria2.actpi.com
+
+  blog-coding:
+    image: nginx
+    container_name: blog-coding
+    volumes:
+      - /etc/nginx/vhost.d/coding:/etc/nginx/conf.d
+    environment:
+      - VIRTUAL_HOST=blog.actpi.com
+      - LETSENCRYPT_HOST=blog.actpi.com
+      - LETSENCRYPT_EMAIL=example@qq.com
+
+  blog-github:
+    image: nginx
+    container_name: blog-github
+    volumes:
+      - /etc/nginx/vhost.d/github:/etc/nginx/conf.d
+    environment:
+      - VIRTUAL_HOST=blog.actpi.com
+
+  nextcloud:
+    image: wonderfall/nextcloud
+    container_name: nextcloud
+    depends_on:
+      - nextcloud-db
+    #expose:
+    #  - 443
+    environment:
+      - UID=1000
+      - GID=1000
+      - APC_SHM_SIZE=128M
+      - OPCACHE_MEM_SIZE=128
+      - CRON_PERIOD=15m
+      - ADMIN_USER=admin            # Don't set to configure through browser
+      - ADMIN_PASSWORD=Secret       # Don't set to configure through browser
+      - DB_TYPE=mysql
+      - DB_NAME=nextcloud
+      - DB_USER=nextcloud
+      - DB_PASSWORD=Secret
+      - DB_HOST=nextcloud-db
+      - VIRTUAL_HOST=pan.actpi.com
+      - LETSENCRYPT_HOST=pan.actpi.com
+      - LETSENCRYPT_EMAIL=example@qq.com
+    volumes:
+      - /mnt/block/download:/aria2
+      - /mnt/block/nextcloud/data:/data
+      - /mnt/block/nextcloud/config:/config
+      - /mnt/block/nextcloud/apps:/apps2
+      - /mnt/block/nextcloud/themes:/nextcloud/themes
+
+  nextcloud-db:
+    image: mariadb:10
+    container_name: mariaDB
+    volumes:
+      - /mnt/block/nextcloud/db:/var/lib/mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=Secret
+      - MYSQL_DATABASE=nextcloud
+      - MYSQL_USER=nextcloud
+      - MYSQL_PASSWORD=Secret
