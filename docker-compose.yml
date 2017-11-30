@@ -38,7 +38,7 @@ services:
     environment:
       - VIRTUAL_HOST=blog.actpi.com
       - LETSENCRYPT_HOST=blog.actpi.com
-      - LETSENCRYPT_EMAIL=example@qq.com
+      - LETSENCRYPT_EMAIL=example@example.com
 
   blog-github:
     image: nginx
@@ -68,15 +68,15 @@ services:
       - DB_USER=nextcloud
       - DB_PASSWORD=Secret
       - DB_HOST=nextcloud-db
-      - VIRTUAL_HOST=pan.actpi.com
-      - LETSENCRYPT_HOST=pan.actpi.com
-      - LETSENCRYPT_EMAIL=example@qq.com
+      - VIRTUAL_HOST=cloud.actpi.com
+      - LETSENCRYPT_HOST=cloud.actpi.com
+      - LETSENCRYPT_EMAIL=example@example.com
     volumes:
-      - /mnt/block/download:/aria2
-      - /mnt/block/nextcloud/data:/data
-      - /mnt/block/nextcloud/config:/config
-      - /mnt/block/nextcloud/apps:/apps2
-      - /mnt/block/nextcloud/themes:/nextcloud/themes
+      - /mnt/download:/aria2
+      - /mnt/nextcloud/data:/data
+      - /mnt/nextcloud/config:/config
+      - /mnt/nextcloud/apps:/apps2
+      - /mnt/nextcloud/themes:/nextcloud/themes
 
   nextcloud-db:
     image: mariadb:10
@@ -91,4 +91,4 @@ services:
 networks:
   default:
     external:
-	  name: web-proxy
+      name: web-proxy
